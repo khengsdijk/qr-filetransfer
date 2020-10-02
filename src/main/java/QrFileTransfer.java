@@ -1,74 +1,44 @@
-import qr.QRCodeGenerator;
-import server.PortScanner;
-import server.Server;
+import services.ReceiveService;
+import services.SendService;
+import services.TextService;
 
 import java.util.Scanner;
 
 public class QrFileTransfer {
 
-    private Server server;
+    private final String GREETING = "what would you like to do?";
+    private final String SEND_FILE = "[1] send a file to my phone";
+    private final String RECEIVE_FILE = "[2] send a file to my computer";
+    private final String EXCHANGE_TEXT = "[3] exchange text with my computer";
+    private final String EXIT = "[4] to exit the program";
+    private final String ENTER_OPTIONS = "Please select an option: ";
 
-    public void startApplication(){
-        startServer();
-        displayOptions();
-    }
 
     public void displayOptions(){
-        System.out.println("what would you like to do?");
-        System.out.println("[1] send files to my pc");
-        System.out.println("[2] send files to my phone");
-        System.out.println("[3] send text to my pc");
-        System.out.println("[4] to exit the program");
-        System.out.print("please select an option: ");
+        System.out.printf("%s\n%s\n%s\n%s\n%s\n%s", GREETING, SEND_FILE, RECEIVE_FILE, EXCHANGE_TEXT, EXIT, ENTER_OPTIONS);
+
         Scanner myInput = new Scanner( System.in );
 
         int a = myInput.nextInt();
 
         switch (a){
-
             case 1:
-                sendToPc();
+                new SendService().startSendingFile();
                 break;
             case 2:
-                sendToPhone();
+                new ReceiveService().receiveFile();
                 break;
             case 3:
-                sendTextToPC();
+                new TextService().startTextExchange();
                 break;
             case 4:
                 System.exit(0);
                 break;
             default:
-                System.out.println("Unrecognized option");
+                System.out.println("Invalid option");
                 displayOptions();
         }
-
-
     }
-
-    public void startServer(){
-        server = new Server();
-    }
-
-    public void sendToPc(){
-
-        QRCodeGenerator code = new QRCodeGenerator("hello world");
-
-        code.printCode();
-        PortScanner scanner = new PortScanner();
-
-    }
-
-    public void sendToPhone(){
-
-    }
-
-    public void sendTextToPC(){
-
-    }
-
-
-
 
 
 }

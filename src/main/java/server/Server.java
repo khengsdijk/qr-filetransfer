@@ -1,62 +1,78 @@
 package server;
 
 import Util.NetworkingUtils;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.sql.SQLOutput;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class Server {
 
     private String address;
-    private boolean online;
+    private int port;
     private HttpServer httpServer;
 
     public Server(){
-        online = false;
+        //start server in constructor to avoid nullPointer errors when adding handlers
+        startServer();
+    }
+
+    public void addHandler(String endpoint, HttpHandler handler){
+        httpServer.createContext(endpoint, handler);
     }
 
     /**
-     * sends a single file to a users phone over wifi
+     * adds handler to the server for editing text
      */
-    public void send(){
-
+    public void text() {
+        httpServer.createContext("/text", new TextHandler());
     }
-
 
     /**
-     * reveives a single file from a users phone over wifi
+     * adds handler to the server for sending a file
      */
-    public void receive(){
-
+    public void send(String filePath){
+        httpServer.createContext("/send", new SendHandler(filePath));
     }
-
 
     /**
-     *
+     * adds handler to the server for receiving a file
      */
-    public void text(){
-
+    public void receive(String storageDirectory) {
+        httpServer.createContext("/receive", new ReceiveHandler( storageDirectory));
     }
 
-    public void startServer(){
+    /**
+     * start the server by finding network
+     */
+    private void startServer(){
 
-        String networkInterface = NetworkingUtils.findWirelessInterface();
-        int port = NetworkingUtils.findFreePort(networkInterface);
+        String networkInterface = NetworkingUtils.getPossibleAddresses().get(0);
+        int usedPort = NetworkingUtils.findFreePort(networkInterface);
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
 
         try {
-
-            httpServer = HttpServer.create(new InetSocketAddress(networkInterface, port), 0 );
+            httpServer = HttpServer.create(new InetSocketAddress(networkInterface, usedPort), 0 );
+            httpServer.setExecutor(threadPoolExecutor);
+            httpServer.start();
+            address = httpServer.getAddress().getHostName();
+            port = httpServer.getAddress().getPort();
 
         } catch (IOException e) {
             System.out.println("failed to start a server");
             e.printStackTrace();
             System.exit(1);
         }
-
-        online = true;
     }
 
+    public int getPort(){
+        return port;
+    }
+
+    public String getAddress(){
+        return address;
+    }
 }

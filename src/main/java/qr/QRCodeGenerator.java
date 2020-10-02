@@ -6,34 +6,14 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import net.glxn.qrgen.javase.QRCode;
-
-import javax.imageio.ImageIO;
-
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.util.Hashtable;
 
 public class QRCodeGenerator {
 
-    private String input;
-    private final char WHITE_SQUARE = 0x25A0;
-    private final char WHITE_SPACE = 0x25A1;
-
-    private int width = 40;
-    private int height = 40;
-
-    public QRCodeGenerator(String input) {
-        this.input = input;
-    }
-
-    public ByteArrayOutputStream getByteStream(){
-        return QRCode.from(input).stream();
-    }
-
-    public void printCode(){
+    /**
+     * print a QR code to the terminal
+     */
+    public static void printCode(String input, int width, int height  ){
         String s = "Failed to generate QR code";
 
         // Used to set QR code parameters
@@ -53,22 +33,25 @@ public class QRCodeGenerator {
         System.out.println(s);
     }
 
+    /**
+     * convert bitmatrix to ASCII
+     */
     public static String toAscii(BitMatrix bitMatrix) {
         StringBuilder sb = new StringBuilder();
         for (int rows = 0; rows < bitMatrix.getHeight(); rows++) {
             for (int cols = 0; cols < bitMatrix.getWidth(); cols++) {
                 boolean x = bitMatrix.get(rows, cols);
                 if (!x) {
-                    // white
+                    // black terminal colour
                     sb.append("\033[47m  \033[0m");
                 } else {
-                    sb.append("\033[40m  \033[0m");
+                    //white terminal colour
+                    sb.append("\033[33m  \033[0m");
                 }
             }
             sb.append("\n");
         }
         return sb.toString();
     }
-
 
 }

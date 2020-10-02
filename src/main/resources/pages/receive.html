@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <link crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>Send a file to your pc</title>
+    <style>
+        body {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <p>please select a file to send to your computer</p>
+        <form id="fileform" method="post" enctype="multipart/form-data" onsubmit="saveFile()">
+            <input id="filedata" class="form-control-file" type="file" name="files" id="files">
+            <input id="tranfer-button" type="submit" value="Transfer">
+        </form>
+</div>
+<style>
+    .container{
+        height: 400px;
+        width: 400px;
+        background-color: #7cc4ee;
+        margin: auto;
+        border-color: black;
+        border-width: 2px;
+    }
+    #transfer-button{
+        background-color: #555555;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 4px;
+
+    }
+
+</style>
+<script>
+ function saveFile(){
+
+    var form = document.getElementById("fileform");
+        var filename = form[0].value;
+        filename = filename.substring(filename.lastIndexOf("\\")+1);
+        let test = "/receive?filename="+filename;
+        form.action = test;
+        return true;
+
+ }
+</script>
+</body>
+</html>
