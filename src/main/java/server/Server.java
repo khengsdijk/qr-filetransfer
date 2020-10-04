@@ -25,36 +25,18 @@ public class Server {
     }
 
     /**
-     * adds handler to the server for editing text
-     */
-    public void text() {
-        httpServer.createContext("/text", new TextHandler());
-    }
-
-    /**
-     * adds handler to the server for sending a file
-     */
-    public void send(String filePath){
-        httpServer.createContext("/send", new SendHandler(filePath));
-    }
-
-    /**
-     * adds handler to the server for receiving a file
-     */
-    public void receive(String storageDirectory) {
-        httpServer.createContext("/receive", new ReceiveHandler( storageDirectory));
-    }
-
-    /**
      * start the server by finding network
      */
     private void startServer(){
 
+        //find suitable network interface and free port
         String networkInterface = NetworkingUtils.getPossibleAddresses().get(0);
         int usedPort = NetworkingUtils.findFreePort(networkInterface);
+        //set the thread executor for the server
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
 
         try {
+            //attempt to start the server with the discovered network interface address and port
             httpServer = HttpServer.create(new InetSocketAddress(networkInterface, usedPort), 0 );
             httpServer.setExecutor(threadPoolExecutor);
             httpServer.start();

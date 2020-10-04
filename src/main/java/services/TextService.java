@@ -4,12 +4,15 @@ import server.TextHandler;
 
 public class TextService extends Service {
 
-        private final String ENDPOINT = "/text";
+    private final String ENDPOINT = "/text";
 
-        public void startTextExchange(){
-            startServer();
-            server.addHandler(ENDPOINT, new TextHandler());
-            printCode(ENDPOINT);
-        }
+    /**
+     * start the server and add the endpoint for adding text
+     */
+    public void startTextExchange() {
+        startServer();
+        server.addHandler(ENDPOINT, new TextHandler());
+        printCode(ENDPOINT);
+    }
 
 }

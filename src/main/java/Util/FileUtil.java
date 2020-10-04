@@ -17,10 +17,10 @@ public class FileUtil {
      */
     public static String loadFilesAsZip(String[] files) throws IOException {
 
+        // create temporary zip file
         File f = new File("temp.zip");
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(f));
-
-
+        // add the selected files to the zip file
         for(String file: files){
             File entry = new File(file);
 

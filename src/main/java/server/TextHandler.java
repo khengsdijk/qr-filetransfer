@@ -9,11 +9,18 @@ import org.json.JSONObject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * handle the Http requests for exchanging text
+ */
 public class TextHandler implements HttpHandler {
 
     private final String EXIT_PAGE = "pages/exit.html";
     private final String SAVE_PAGE = "pages/save.html";
     private final String TEXT_PAGE = "pages/text.html";
+
+    private final String SAVE_PARAMETER = "save";
+    private final String UPDATE_PARAMETER = "update";
+    private final String EXIT_PARAMETER = "update";
 
     private String textAreaContent;
 
@@ -34,16 +41,16 @@ public class TextHandler implements HttpHandler {
             return;
         }
 
-        if("save".equals(httpExchange.getRequestURI().getQuery())) {
+        if(SAVE_PARAMETER.equals(httpExchange.getRequestURI().getQuery())) {
             handlePageLoading(httpExchange, SAVE_PAGE);
             System.exit(0);
         }
 
-        if("update".equals(httpExchange.getRequestURI().getQuery()))
+        if(UPDATE_PARAMETER.equals(httpExchange.getRequestURI().getQuery()))
             updateTextArea(httpExchange);
 
 
-        if("exit".equals(httpExchange.getRequestURI().getQuery())) {
+        if(EXIT_PARAMETER.equals(httpExchange.getRequestURI().getQuery())) {
             handlePageLoading(httpExchange, EXIT_PAGE);
             System.exit(0);
         }
