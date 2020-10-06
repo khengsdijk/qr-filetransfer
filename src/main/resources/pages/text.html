@@ -7,15 +7,17 @@
 </head>
 <body>
     <div id="content">
-    <h1>write some text from your phone or computer to update </h1>
-    <textarea id=text-content oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' ></textarea>
+        <h1>write some text from your phone or computer to update </h1>
+        
+        <textarea id="text-content"></textarea>
+    
+        <div id="controls">
+            <button onclick="save()">save as text file</button>
+            <button onclick="exit()">exit the program</button>
+        </div>
+    </div>
 
-    <div id="controls">
-        <button onclick="save()">save as text file</button>
-        <button onclick="exit()">exit the program</button>
-    </div>
-    </div>
-    <style>
+<style>
         body { 
             font-family: 'Open Sans', sans-serif;
             font-size: 16px;
@@ -60,75 +62,71 @@
             box-shadow: inset 0 0 0.25rem #ddd;
         }
 
-    </style>
+</style>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 <script>
 
-    document.getElementById("text-content").addEventListener("input", updateText);
+const identifier = Math.floor(Date.now() / Math.floor(Math.random() * 100)) +1;
 
-    var sleep = time => new Promise(resolve => setTimeout(resolve, time))
-    var poll = (promiseFn, time) => promiseFn().then(
-                sleep(time).then(() => poll(promiseFn, time)))
+document.getElementById("text-content").addEventListener("input", sendUpdate);
 
-    poll(() => new Promise(() => getTextAreaUpdate()), 500)
+function sendUpdate(){
 
-
-// add a boolean to prevent the text with updating itself after changing it here 
-function updateText(){
-
-    let text = document.getElementById("text-content").value;
-
-    console.log(text);
-    const data = { content: text };
+    let text = $('#text-content').prop("value");
+    let data  = {
+        index: 0,
+        clientID: identifier,
+        content: text
+    }
 
     fetch(document.URL, {
-
-    method: 'PUT',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-        body: JSON.stringify(data),
-    
-    });
-}
-
-function getTextAreaUpdate(){
-
-    const url = document.URL +  '?update';
-
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            textArea =  document.getElementById("text-content")
-            if(textArea.value !== data.content){
-                textArea.value = data.content;
-            }    
-        })
-}
-
-async function save(){
-    let text = document.getElementById("text-content").value;
-
-    console.log(text);
-    const data = { content: text };
-
-    await fetch(document.URL, {
-
-        method: 'POST',
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
     });
-    
-
-    const url = document.URL +  '?save';
-    location.href = url;
 }
 
-function exit(){
-    const url = document.URL +  '?exit';
-    location.href = url;
+
+const stream = new ReadableStream({
+    start(controller) {
+        interval = setInterval(() => {
+            const url = document.URL +  '?update=true&client=' + identifier;
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                let a =  {
+                        content: data.content,
+                        initialMessage: data.initialMessage 
+                    }
+                    if(a.initialMessage !== 0){                
+                        controller.enqueue(a);    
+                    }
+            });
+      }, 500);
+    }
+  });
+
+
+function readStream() {
+
+  const reader = stream.getReader();
+  reader.read().then(function processText({done,  value }) {
+            
+    let cursorPosition = $('#text-content').prop("selectionStart");
+    $('#text-content').prop("value", value.content);
+    //reset cursor position
+    $('#text-content').prop("selectionStart", cursorPosition);
+    $('#text-content').prop("selectionEnd", cursorPosition);
+
+    return reader.read().then(processText);
+  });
 }
+
+readStream();
+
+
 
 
 </script>
