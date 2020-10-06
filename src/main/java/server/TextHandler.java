@@ -1,13 +1,19 @@
 package server;
 
 import Util.FileUtil;
+import Util.NetworkingUtils;
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import model.TextUpdate;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * handle the Http requests for exchanging text
@@ -21,15 +27,18 @@ public class TextHandler implements HttpHandler {
     private final String SAVE_PARAMETER = "save";
     private final String UPDATE_PARAMETER = "update";
     private final String EXIT_PARAMETER = "update";
+    private final String CLIENT_PARAMETER = "client";
 
-    private String textAreaContent;
+    private TextUpdateProcessor processor;
 
     public TextHandler(){
-        textAreaContent = "";
+        processor = new TextUpdateProcessor();
     }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+
+        var query = NetworkingUtils.queryToMap(httpExchange.getRequestURI().getQuery());
 
         if(httpExchange.getRequestMethod().equals("PUT")){
             handleTextChanges(httpExchange);
@@ -41,13 +50,13 @@ public class TextHandler implements HttpHandler {
             return;
         }
 
-        if(SAVE_PARAMETER.equals(httpExchange.getRequestURI().getQuery())) {
+        if(query.containsKey(SAVE_PARAMETER)) {
             handlePageLoading(httpExchange, SAVE_PAGE);
             System.exit(0);
         }
 
-        if(UPDATE_PARAMETER.equals(httpExchange.getRequestURI().getQuery()))
-            updateTextArea(httpExchange);
+        if(query.containsKey(UPDATE_PARAMETER))
+            updateTextArea(httpExchange, query);
 
 
         if(EXIT_PARAMETER.equals(httpExchange.getRequestURI().getQuery())) {
@@ -60,9 +69,10 @@ public class TextHandler implements HttpHandler {
     /**
      * send the latest version of the text to the client
      */
-    private void updateTextArea(HttpExchange httpExchange) throws IOException {
+    private void updateTextArea(HttpExchange httpExchange, Map<String, String> query) throws IOException {
         OutputStream outputStream = httpExchange.getResponseBody();
-        String jsonResult = new JSONObject().put("content", textAreaContent).toString();
+
+        String jsonResult = new Gson().toJson(processor.getUpdate(query.get(CLIENT_PARAMETER) ));
 
         // set the headers and content of the html response
         httpExchange.sendResponseHeaders(200, jsonResult.getBytes().length);
@@ -103,12 +113,17 @@ public class TextHandler implements HttpHandler {
         httpExchange.close();
 
         try {
-            JSONObject jsonObject = new JSONObject(jsonBody);
-            String result = jsonObject.get("content").toString();
 
-            if(!result.equals(textAreaContent))
-                textAreaContent = jsonObject.get("content").toString();
+            TextUpdate textUpdate = new Gson().fromJson(jsonBody, TextUpdate.class);
 
+            processor.AddUpdate(textUpdate);
+                //TODO edit specific index and shit goodnight and maybe add a unique client identifier so the client
+                // does not update itself with its own shitty requests
+                // client or just update the text here according to a queue and send the whole string back anyways
+                // yeah that will work just send the whole string but append the string here with indexes
+                // and just keep the right index in the frontend  nice
+                    // and also use a fucking queue instead of direct appending
+                    // maybe return an array of changes
         } catch (JSONException err){
             System.out.println(err);
         }
