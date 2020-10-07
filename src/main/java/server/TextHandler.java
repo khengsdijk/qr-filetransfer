@@ -113,17 +113,8 @@ public class TextHandler implements HttpHandler {
         httpExchange.close();
 
         try {
-
             TextUpdate textUpdate = new Gson().fromJson(jsonBody, TextUpdate.class);
-
             processor.AddUpdate(textUpdate);
-                //TODO edit specific index and shit goodnight and maybe add a unique client identifier so the client
-                // does not update itself with its own shitty requests
-                // client or just update the text here according to a queue and send the whole string back anyways
-                // yeah that will work just send the whole string but append the string here with indexes
-                // and just keep the right index in the frontend  nice
-                    // and also use a fucking queue instead of direct appending
-                    // maybe return an array of changes
         } catch (JSONException err){
             System.out.println(err);
         }

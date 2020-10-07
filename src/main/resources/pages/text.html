@@ -74,7 +74,8 @@ function sendUpdate(){
 
     let text = $('#text-content').prop("value");
     let data  = {
-        index: 0,
+        initialMessage: 0,
+        hasUpdate: 1,
         clientID: identifier,
         content: text
     }
@@ -98,34 +99,59 @@ const stream = new ReadableStream({
             .then(data => {
                 let a =  {
                         content: data.content,
-                        initialMessage: data.initialMessage 
+                        initialMessage: data.initialMessage, 
+                        hasUpdate: data.hasUpdate 
                     }
-                    if(a.initialMessage !== 0){                
-                        controller.enqueue(a);    
+                    if(a.hasUpdate === 1){                
+                        let cursorPosition = $('#text-content').prop("selectionStart");
+                        $('#text-content').prop("value", a.content);
+                        //reset cursor position
+                        $('#text-content').prop("selectionStart", cursorPosition);
+                        $('#text-content').prop("selectionEnd", cursorPosition);  
                     }
             });
-      }, 500);
+      }, 200);
     }
   });
 
 
-function readStream() {
+// function readStream() {
 
-  const reader = stream.getReader();
-  reader.read().then(function processText({done,  value }) {
+//   const reader = stream.getReader();
+//   reader.read().then(function processText({done,  value }) {
             
-    let cursorPosition = $('#text-content').prop("selectionStart");
-    $('#text-content').prop("value", value.content);
-    //reset cursor position
-    $('#text-content').prop("selectionStart", cursorPosition);
-    $('#text-content').prop("selectionEnd", cursorPosition);
+//     let cursorPosition = $('#text-content').prop("selectionStart");
+//     $('#text-content').prop("value", value.content);
+//     //reset cursor position
+//     $('#text-content').prop("selectionStart", cursorPosition);
+//     $('#text-content').prop("selectionEnd", cursorPosition);
 
-    return reader.read().then(processText);
-  });
-}
+//     return reader.read().then(processText);
+//   });
+// }
 
 readStream();
 
+async function save(){
+    let text = document.getElementById("text-content").value;
+    const data = { content: text };
+
+    await fetch(document.URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    const url = document.URL +  '?save=true';
+    location.href = url;
+}
+
+function exit(){
+    const url = document.URL +  '?exit=true';
+    location.href = url;
+}
 
 
 

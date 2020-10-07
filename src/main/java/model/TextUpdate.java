@@ -3,6 +3,7 @@ package model;
 public class TextUpdate {
 
     private int initialMessage;
+    private int hasUpdate;
     private String clientID;
     private String content;
 
@@ -10,10 +11,19 @@ public class TextUpdate {
 
     }
 
-    public TextUpdate(int initialMessage, String clientID, String content) {
+    public TextUpdate(int initialMessage, int hasUpdate, String clientID, String content) {
         this.initialMessage = initialMessage;
+        this.hasUpdate = hasUpdate;
         this.clientID = clientID;
         this.content = content;
+    }
+
+    public int getHasUpdate() {
+        return hasUpdate;
+    }
+
+    public void setHasUpdate(int hasUpdate) {
+        this.hasUpdate = hasUpdate;
     }
 
     public String getClientID() {

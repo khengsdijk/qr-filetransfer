@@ -44,21 +44,21 @@ public class TextUpdateProcessor {
      * latest version of the text
      */
     public TextUpdate getUpdate(String client){
-        System.out.println(data.toString());
         if (!clientUpdates.containsKey(client)){
             clientUpdates.put(client, new ArrayBlockingQueue<>(MAX_QUEUE_SIZE));
-            System.out.println("added a client");
-            return new TextUpdate(1, client, data.toString());
+            return new TextUpdate(1, 1, client, data.toString());
         }
 
         TextUpdate result = clientUpdates.get(client).poll();
-        System.out.println("found data for client: " + result);
         // if no data found return empty data
         if(result == null)
-            return new TextUpdate(0, client, "");
+            return new TextUpdate(0, 0,client, "");
         return result;
     }
 
+    /**
+     * separate thread class for processing the updates concurrently
+     */
     class ProcessUpdates implements Runnable {
 
         @Override
@@ -89,13 +89,13 @@ public class TextUpdateProcessor {
         }
 
         /**
-         * add the update to the client queue except for the one that send the update
+         * add the update to the client queue except for the one that send the update to prevent client receiving
+         * its own updates
          */
         private void addToQueues(TextUpdate textUpdate){
             Enumeration<String> clients = clientUpdates.keys();
             clients.asIterator().forEachRemaining(client -> {
                     if(!client.equals(textUpdate.getClientID())){
-                        System.out.println("Adding to update queue: " + textUpdate.getContent());
                         clientUpdates.get(client).add(textUpdate);
                     }
                 });
