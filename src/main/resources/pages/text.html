@@ -114,24 +114,6 @@ const stream = new ReadableStream({
     }
   });
 
-
-// function readStream() {
-
-//   const reader = stream.getReader();
-//   reader.read().then(function processText({done,  value }) {
-            
-//     let cursorPosition = $('#text-content').prop("selectionStart");
-//     $('#text-content').prop("value", value.content);
-//     //reset cursor position
-//     $('#text-content').prop("selectionStart", cursorPosition);
-//     $('#text-content').prop("selectionEnd", cursorPosition);
-
-//     return reader.read().then(processText);
-//   });
-// }
-
-readStream();
-
 async function save(){
     let text = document.getElementById("text-content").value;
     const data = { content: text };
